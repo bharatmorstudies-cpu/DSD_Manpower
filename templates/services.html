@@ -1,17 +1,91 @@
 ﻿{% extends "base.html" %}
 {% block content %}
-<h2 class="text-center my-4 fw-bold">Our Specialised Services</h2>
-<div class="row g-4">
-    <div class="col-md-6">
-        <div class="card h-100 shadow-sm p-3">
-            <h3>👔 Elite Bouncer Services</h3>
-            <p>High-profile security guards for events, venues, VIP protection, and crowd management. Vetted, physically trained, and experts in handling conflicts.</p>
+<style>
+    .section-title {
+        text-align: center;
+        font-size: 32px;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 40px;
+    }
+    .services-layout {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+    }
+    .service-block {
+        background: white;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        border-top: 4px solid #2563eb;
+        border-left: 1px solid #e2e8f0;
+        border-right: 1px solid #e2e8f0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .service-block h3 {
+        font-size: 22px;
+        color: #0f172a;
+        margin-top: 0;
+        margin-bottom: 15px;
+    }
+    .service-block p {
+        color: #475569;
+        font-size: 15px;
+        line-height: 1.7;
+    }
+    
+    /* Professional Corporate FAQ Sections */
+    .faq-container {
+        margin-top: 70px;
+        background: white;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        border: 1px solid #e2e8f0;
+    }
+    .faq-item {
+        border-bottom: 1px solid #e2e8f0;
+        padding: 20px 0;
+    }
+    .faq-item:last-child {
+        border: none;
+    }
+    .faq-question {
+        font-weight: 700;
+        color: #0f172a;
+        font-size: 16px;
+        margin-bottom: 8px;
+    }
+    .faq-answer {
+        color: #475569;
+        font-size: 14px;
+    }
+</style>
+
+<div class="main-wrapper">
+    <h2 class="section-title">Our Premium Corporate Solutions</h2>
+    
+    <div class="services-layout">
+        <div class="service-block">
+            <h3>👔 Elite Bouncer & Executive Protection</h3>
+            <p>Our Tier-1 security operatives provide unmatched security protection for corporate events, VIP transits, high-profile venues, and critical crowd control scenarios. Every officer undergo strict background screenings, mental verification checks, and intensive tactical containment training.</p>
+        </div>
+        <div class="service-block">
+            <h3>🧹 Corporate Housekeeping & Facility Management</h3>
+            <p>We deploy trained sanitation personnel, commercial pantry handlers, and administrative maintenance teams custom-tailored for IT parks, multiplex venues, corporate headquarters, and institutional ecosystems. Equipped with industry-standard machinery and managed via strict operational supervisor oversight.</p>
         </div>
     </div>
-    <div class="col-md-6">
-        <div class="card h-100 shadow-sm p-3">
-            <h3>🧹 Corporate Housekeeping</h3>
-            <p>Comprehensive facility management for corporate offices and commercial hubs. Trained janitorial staff, supervisors, and pantry managers.</p>
+
+    <div class="faq-container">
+        <h3 style="margin-top:0; margin-bottom:25px; font-size:24px; font-weight:800;">Frequently Asked Inquiries</h3>
+        <div class="faq-item">
+            <div class="faq-question">Q: Are the deployed security officers insured and legally verified?</div>
+            <div class="faq-answer">A: Absolutely. All DSD & Matwar personnel operate under strict verification compliance guidelines, possess valid statutory certifications, and are covered under full agency insurance policies.</div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-question">Q: How quickly can emergency additional manpower be scaled?</div>
+            <div class="faq-answer">A: Thanks to our agile resource tracking system, we can mobilize additional emergency units within 2 to 4 hours of notification across regional operating clusters.</div>
         </div>
     </div>
 </div>

@@ -1,20 +1,73 @@
 ﻿{% extends "base.html" %}
 {% block content %}
-<div class="row justify-content-center mt-5">
-    <div class="col-md-6 bg-white p-4 rounded shadow">
-        <h3 class="mb-3 text-center">Staff Payroll Calculator</h3>
+<style>
+    .payroll-container { display: grid; grid-template-columns: 1fr 1.2fr; gap: 30px; margin: 40px auto; }
+    .payroll-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; height: fit-content; }
+    .payroll-card h3 { font-size: 24px; font-weight: 800; color: #0f172a; margin: 0 0 25px 0; }
+    .input-group { margin-bottom: 20px; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: #475569; }
+    .form-control { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 15px; color: #0f172a; box-sizing: border-box; }
+    .form-control:focus { outline: none; border-color: #2563eb; }
+    .calculate-btn { background-color: #0f172a; color: white; width: 100%; padding: 14px; border: none; border-radius: 6px; font-weight: 700; font-size: 16px; cursor: pointer; transition: background-color 0.2s; }
+    .calculate-btn:hover { background-color: #1e293b; }
+    .receipt-voucher { background-color: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 8px; padding: 20px; margin-top: 25px; }
+    .receipt-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
+    .receipt-total { display: flex; justify-content: space-between; border-top: 2px solid #0f172a; padding-top: 10px; margin-top: 10px; font-weight: 800; font-size: 18px; color: #10b981; }
+    .ledger-sheet { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; }
+    .ledger-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+    .ledger-header h3 { font-size: 24px; font-weight: 800; color: #0f172a; margin: 0; }
+    .export-btn { background-color: #10b981; color: white; padding: 8px 16px; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 14px; transition: background 0.2s; }
+    .export-btn:hover { background-color: #059669; }
+    .ledger-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .ledger-table th { background-color: #f1f5f9; color: #475569; text-align: left; padding: 12px; font-weight: 700; }
+    .ledger-table td { padding: 12px; border-bottom: 1px solid #e2e8f0; }
+</style>
+
+<div class="main-wrapper payroll-container">
+    <div class="payroll-card">
+        <h3>Wage Processing Engine</h3>
         <form method="POST">
-            <div class="mb-3"><label class="form-label">Employee Name</label><input type="text" name="staff_name" class="form-control" required></div>
-            <div class="mb-3"><label class="form-label">Hourly Rate</label><input type="number" step="0.01" name="hourly_rate" class="form-control" required></div>
-            <div class="mb-3"><label class="form-label">Hours Worked</label><input type="number" step="0.1" name="hours_worked" class="form-control" required></div>
-            <button type="submit" class="btn btn-dark w-100">Calculate Pay</button>
+            <div class="input-group"><label>Staff Guard / Housekeeper Name</label><input type="text" name="staff_name" class="form-control" placeholder="e.g. Ramesh Kumar" required></div>
+            <div class="input-group"><label>Hourly Pay Rate (₹ / $)</label><input type="number" step="0.01" name="hourly_rate" class="form-control" placeholder="e.g. 150" required></div>
+            <div class="input-group"><label>Total Duty Hours Logged</label><input type="number" step="0.1" name="hours_worked" class="form-control" placeholder="e.g. 48" required></div>
+            <button type="submit" class="calculate-btn">Process Gross Remuneration</button>
         </form>
         {% if result %}
-        <div class="mt-4 p-3 bg-light border rounded text-center">
-            <h5>Statement for: <strong>{{ result.staff_name }}</strong></h5>
-            <h4 class="text-success">Gross Pay: {{ result.gross_pay }}</h4>
+        <div class="receipt-voucher">
+            <h5 style="margin: 0 0 15px 0; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px;">Calculation Voucher</h5>
+            <div class="receipt-row"><span>Employee Reference:</span> <strong>{{ result.staff_name }}</strong></div>
+            <div class="receipt-row"><span>Standard Hours (Max 40):</span> <span>{{ result.reg_hours }} hrs</span></div>
+            <div class="receipt-row"><span>Overtime Hours (1.5x):</span> <span>{{ result.ot_hours }} hrs</span></div>
+            <div class="receipt-total"><span>Gross Payout:</span> <span>{{ result.gross_pay }}</span></div>
         </div>
         {% endif %}
+    </div>
+
+    <div class="ledger-sheet">
+        <div class="ledger-header">
+            <h3>Active Session Log</h3>
+            {% if session_ledger %}
+                <a href="/export-payroll" class="export-btn">📥 Export sheets to Excel</a>
+            {% endif %}
+        </div>
+        <table class="ledger-table">
+            <thead>
+                <tr><th>Staff Name</th><th>Hours Logged</th><th style="text-align: right;">Calculated Pay</th></tr>
+            </thead>
+            <tbody>
+                {% if session_ledger %}
+                    {% for entry in session_ledger %}
+                    <tr>
+                        <td><strong>{{ entry.name }}</strong></td>
+                        <td>{{ entry.hours }} hrs</td>
+                        <td style="text-align: right; font-weight: 700; color: #10b981;">{{ entry.pay }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                <tr><td colspan="3" style="text-align: center; color: #94a3b8; padding: 40px 0;">No wages processed in this active browser session yet.</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}

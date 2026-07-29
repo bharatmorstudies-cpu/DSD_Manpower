@@ -1,8 +1,95 @@
 ﻿{% extends "base.html" %}
 {% block content %}
-<div class="jumbotron">
-    <h1>DSD & Matwar Solutions</h1>
-    <p style="font-size: 18px; color: #ecf0f1; max-width: 700px; margin: 15px auto 25px auto;">Premium Security & Elite Manpower Deployment. We provide verified bouncers, professional corporate housekeeping staff, and strategic corporate security operations.</p>
-    <a class="btn-primary" href="/request-staff">Request Staff Deployment</a>
+<style>
+    .hero-banner {
+        background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+        color: white;
+        padding: 80px 40px;
+        text-align: center;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+    .hero-banner h1 {
+        font-size: 42px;
+        font-weight: 800;
+        margin-bottom: 15px;
+        letter-spacing: -0.5px;
+    }
+    .hero-banner p {
+        font-size: 19px;
+        color: #94a3b8;
+        max-width: 800px;
+        margin: 0 auto 30px auto;
+    }
+    .cta-button {
+        background-color: #2563eb;
+        color: white;
+        padding: 14px 35px;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 16px;
+        display: inline-block;
+        transition: background-color 0.3s;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+    }
+    .cta-button:hover {
+        background-color: #1d4ed8;
+    }
+    
+    /* Corporate Statistics Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin: 50px auto;
+        max-width: 1200px;
+        width: 85%;
+    }
+    .stat-card {
+        background: white;
+        padding: 30px;
+        text-align: center;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        border: 1px solid #e2e8f0;
+    }
+    .stat-card h3 {
+        font-size: 36px;
+        color: #2563eb;
+        margin: 0 0 5px 0;
+        font-weight: 800;
+    }
+    .stat-card p {
+        font-size: 14px;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+        margin: 0;
+    }
+</style>
+
+<div class="main-wrapper" style="margin-top: 40px;">
+    <div class="hero-banner">
+        <h1>DSD & MATWAR SOLUTIONS</h1>
+        <p>Government Registered Elite Security Enforcement & Comprehensive Corporate Manpower Asset Provision.</p>
+        <a class="cta-button" href="/request-staff">Initiate Workforce Request</a>
+    </div>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>500+</h3>
+        <p>Verified Personnel Active</p>
+    </div>
+    <div class="stat-card">
+        <h3>24/7</h3>
+        <p>Command Centre Support</p>
+    </div>
+    <div class="stat-card">
+        <h3>99.4%</h3>
+        <p>Client Retention Rating</p>
+    </div>
 </div>
 {% endblock %}

@@ -1,6 +1,8 @@
-﻿from flask import Flask, render_template, request, redirect, url_for, flash, session
+﻿from flask import Flask, render_template, request, redirect, url_for, flash, session, Response
 from flask_sqlalchemy import SQLAlchemy
 import os
+import csv
+import io
 
 app = Flask(__name__)
 app.secret_key = "security_manpower_secret_key"
@@ -46,16 +48,60 @@ def request_staff():
 
 @app.route("/payroll", methods=["GET", "POST"])
 def payroll():
+    if "ledger" not in session:
+        session["ledger"] = []
+        
     payroll_result = None
     if request.method == "POST":
         try:
+            name = request.form.get("staff_name")
             hourly_rate = float(request.form.get("hourly_rate", 0))
             hours_worked = float(request.form.get("hours_worked", 0))
-            gross_pay = (40 * hourly_rate) + ((hours_worked - 40) * hourly_rate * 1.5) if hours_worked > 40 else hours_worked * hourly_rate
-            payroll_result = {"staff_name": request.form.get("staff_name"), "hours": hours_worked, "gross_pay": round(gross_pay, 2)}
+            
+            if hours_worked > 40:
+                reg_hours = 40
+                ot_hours = hours_worked - 40
+                gross_pay = (40 * hourly_rate) + (ot_hours * hourly_rate * 1.5)
+            else:
+                reg_hours = hours_worked
+                ot_hours = 0
+                gross_pay = hours_worked * hourly_rate
+                
+            payroll_result = {
+                "staff_name": name,
+                "reg_hours": reg_hours,
+                "ot_hours": ot_hours,
+                "gross_pay": f"{round(gross_pay, 2)}"
+            }
+            
+            current_ledger = list(session["ledger"])
+            current_ledger.append({"name": name, "hours": hours_worked, "pay": f"{round(gross_pay, 2)}"})
+            session["ledger"] = current_ledger
+            
         except ValueError:
             flash("Enter valid numbers.", "danger")
-    return render_template("payroll.html", result=payroll_result)
+            
+    return render_template("payroll.html", result=payroll_result, session_ledger=session["ledger"])
+
+@app.route("/export-payroll")
+def export_payroll():
+    ledger = session.get("ledger", [])
+    if not ledger:
+        return redirect(url_for("payroll"))
+        
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Staff Name", "Total Hours Logged", "Gross Payout"])
+    
+    for row in ledger:
+        writer.writerow([row["name"], row["hours"], row["pay"]])
+        
+    output.seek(0)
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-disposition": "attachment; filename=DSD_Matwar_Payroll_Export.csv"}
+    )
 
 @app.route("/admin-login", methods=["GET", "POST"])
 def admin_login():
@@ -73,6 +119,17 @@ def admin_dashboard():
         return redirect(url_for("admin_login"))
     all_leads = ManpowerRequest.query.all()
     return render_template("admin_dashboard.html", leads=all_leads)
+
+# --- SECURE DELETION ROUTE ---
+@app.route("/admin-delete/<int:lead_id>")
+def admin_delete(lead_id):
+    if not session.get("admin_logged_in"):
+        return redirect(url_for("admin_login"))
+    lead_to_delete = ManpowerRequest.query.get_or_404(lead_id)
+    db.session.delete(lead_to_delete)
+    db.session.commit()
+    flash("Inquiry record successfully archived and removed from database.", "success")
+    return redirect(url_for("admin_dashboard"))
 
 @app.route("/admin-logout")
 def admin_logout():
