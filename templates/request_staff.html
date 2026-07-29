@@ -1,0 +1,21 @@
+﻿{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 bg-white p-4 rounded shadow">
+        <h3 class="mb-3 text-center">Manpower Hiring Request</h3>
+        <form method="POST">
+            <div class="mb-3"><label class="form-label">Client Name</label><input type="text" name="name" class="form-control" required></div>
+            <div class="mb-3"><label class="form-label">Email Address</label><input type="email" name="email" class="form-control" required></div>
+            <div class="mb-3"><label class="form-label">Service Required</label>
+                <select name="service_type" class="form-select">
+                    <option value="Bouncers">Elite Bouncers</option>
+                    <option value="Housekeeping">Corporate Housekeeping</option>
+                </select>
+            </div>
+            <div class="mb-3"><label class="form-label">Staff Count</label><input type="number" name="staff_count" class="form-control" min="1" required></div>
+            <div class="mb-3"><label class="form-label">Specific Details</label><textarea name="details" class="form-control" rows="3"></textarea></div>
+            <button type="submit" class="btn btn-primary w-100">Submit Request</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

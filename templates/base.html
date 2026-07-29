@@ -1,0 +1,49 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSD & Matwar Security & Manpower</title>
+    <style>
+        body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; color: #333; }
+        .navbar { background-color: #1a252f; padding: 15px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between; }
+        .container { width: 85%; max-width: 1100px; margin: auto; }
+        .navbar-brand { font-size: 24px; font-weight: bold; color: #fff; text-decoration: none; display: inline-block; }
+        .navbar-nav { float: right; margin-top: 5px; }
+        .navbar-nav a { color: #cbd5e1; text-decoration: none; margin-left: 20px; font-weight: 500; transition: color 0.2s; }
+        .navbar-nav a:hover { color: #fff; }
+        .admin-btn { background-color: #e74c3c; color: white !important; padding: 5px 12px; border-radius: 4px; }
+        .admin-btn:hover { background-color: #c0392b; }
+        .content-area { margin-top: 40px; }
+        .jumbotron { background-color: #2c3e50; color: white; padding: 50px; border-radius: 8px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .jumbotron h1 { margin-top: 0; font-size: 38px; }
+        .btn-primary { background-color: #3498db; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; margin-top: 15px; border: none; cursor: pointer; transition: background 0.2s; }
+        .btn-primary:hover { background-color: #2980b9; }
+        .alert { background-color: #2ecc71; color: white; padding: 15px; border-radius: 5px; text-align: center; margin-bottom: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a class="navbar-brand" href="/">🛡️ DSD & Matwar</a>
+            <div class="navbar-nav">
+                <a href="/">Home</a>
+                <a href="/services">Services</a>
+                <a href="/request-staff">Hire Personnel</a>
+                <a href="/payroll">Internal Payroll</a>
+                <a href="/admin-login" class="admin-btn">🔑 Admin Portal</a>
+            </div>
+        </div>
+    </nav>
+    <div class="container content-area">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>
