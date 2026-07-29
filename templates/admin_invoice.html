@@ -19,14 +19,11 @@
             </select>
             <label style="font-weight:600; font-size:14px; color:#475569;">Deployment Cost Per Head (Daily)</label>
             <input type="number" name="rate_per_head" class="form-control" placeholder="e.g. 1500" required>
-            
             <label style="font-weight:600; font-size:14px; color:#475569;">Deployment Duration (Days)</label>
             <input type="number" name="duration_days" class="form-control" min="1" value="1" required>
-            
             <button type="submit" class="bill-btn">Generate Corporate Invoice</button>
         </form>
     </div>
-
     <div>
         {% if invoice %}
         <div class="sheet-doc">
