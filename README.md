@@ -1,78 +1,97 @@
-# 🛡️ Security & Manpower Supply Business Website
+﻿# 🛡️ DSD & Matwar Security & Manpower Solutions
 
-A robust, secure, and professional web application built using Python to showcase premium security services and corporate manpower solutions. This platform allows clients to explore staffing services, request security personnel, and submit hiring inquiries.
+An enterprise-grade, secure, and responsive web application built using Python to streamline tier-1 security operations, corporate facility assets management, and administrative staffing pipelines. 
 
----
-
-## 🌟 Key Features
-
-* **Service Catalog**: Detailed overviews of Guarding, Executive Protection, Event Security, and Facility Management.
-* **Manpower Request Portal**: Interactive forms for corporate clients to submit specific staffing needs.
-* **Job Application Portal**: A dedicated recruitment page for job seekers to upload resumes and apply for roles.
-* **Admin Dashboard**: Secure backend for management to view incoming client leads and applicant data.
-* **Contact & Quotation Engine**: Automatic email notifications for quick client bidding and quotes.
+Live Deployment Link: https://pythonanywhere.com
 
 ---
 
-## 🛠️ Tech Stack
+## 🌟 Strategic Business Core Modules
 
-* **Backend**: Python 3.11+ with [Flask](https://palletsprojects.com) (or [Django](https://djangoproject.com))
-* **Frontend**: HTML5, CSS3, JavaScript, and Bootstrap 5 (Responsive Layout)
-* **Database**: SQLite (Development) / PostgreSQL (Production)
-* **Authentication**: Flask-Login / Django Auth (Secure admin panel)
+### 1. 💼 Executive Procurement Intake Portal
+* **Target Audience**: Corporate clients, commercial enterprises, and venue hubs.
+* **Functionality**: Standardizes high-volume staffing requests for elite bouncers, security forces, and specialized facilities personnel. 
+* **Persistence**: Automates lead logging directly into a relational backend database framework.
 
----
+### 2. 👥 Integrated Recruitment Pipeline
+* **Target Audience**: Field personnel and applicants seeking operational employment.
+* **Functionality**: Provides a dedicated, frictionless landing node capturing vetting information, physical attributes, contact anchors, and tracking histories.
 
-## ⚙️ Installation & Setup
+### 3. 📡 Mobile Duty Attendance Tracker
+* **Target Audience**: Deployed field operators and security staff.
+* **Functionality**: Mobile-optimized field terminal grouping **Check-In** and **Check-Out** punches onto a single row. It eliminates duplicate logging and automatically calculates cumulative shift durations.
 
-Follow these steps to run the website locally on your machine.
-
-### 1. Clone the Repository
-```bash
-git clone https://github.com
-cd security-manpower-website
-```
-
-### 2. Set Up a Virtual Environment
-```bash
-# Windows
-python -m venv venv
-venv\Scripts\activate
-
-# macOS/Linux
-python3 -m venv venv
-source venv/bin/activate
-```
-
-### 3. Install Dependencies
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Run the Application
-```bash
-# For Flask application
-python app.py
-```
-The website will be live at `http://127.0.0`.
+### 4. 🧮 Operations Control Dashboard & Invoicing Engine
+* **Target Audience**: Internal administrative management.
+* **Functionality**: 
+  * Password-protected workspace managing incoming leads and applications with instant confirmation logic.
+  * Built-in **Wage Processing Calculator** tracking overtime margins at 1.5x scaling rates.
+  * Direct **Invoice Engine** pulling client metrics from rows to generate corporate billing statements with a single click.
+  * Structured **Excel/CSV Export Utilities** for payroll analytics.
 
 ---
 
-## 📂 Project Structure
+## 🛠️ Technology Stack Architecture
+
+* **Backend Framework**: Python 3.11+ / Flask Framework
+* **Data Layer Management**: SQLite Engine utilizing Python SQLAlchemy ORM mapping classes.
+* **Frontend Matrix**: Semantic HTML5, Embedded Custom CSS, and Jinja2 Templating Systems (Zero External CDN Dependency for 100% Offline Integrity).
+* **Environment Core**: Python Session Cryptography & Flask Relational Context Layers.
+
+---
+
+## 📂 Project Architecture Mapping
 
 ```text
-├── static/                  # CSS, JavaScript, and corporate images
-├── templates/               # HTML layout files (Home, Services, Careers, Contact)
-├── app.py                   # Main Python application router and logic
-├── models.py                # Database schemas (Leads, Applicants, Users)
-├── requirements.txt         # List of Python library dependencies
-└── README.md                # Project documentation
+├── instance/
+│   └── database.db          # Persistent Relational SQLite Database
+├── templates/
+│   ├── base.html            # Master Layout (Corporate Design Theme)
+│   ├── home.html            # Corporate Showcase & Statistics Landing Node
+│   ├── services.html        # Solutions Matrix & Operational FAQ Engine
+│   ├── request_staff.html   # B2B Procurement Intake Form Card
+│   ├── careers.html         # Application Intake Interface
+│   ├── attendance.html      # Mobile Shift Check-In/Out Punch Terminal
+│   ├── payroll.html         # Wage Processing Sheet with Excel Export
+│   ├── admin_login.html     # Secure Gateway Access Panel
+│   └── admin_dashboard.html # Central Command (Leads, Attendance Sheets)
+├── app.py                   # Master Application Router, Math Logic, & API Points
+└── README.md                # System Documentation Portfolio
 ```
 
 ---
 
-## 🔒 Security Practices Built-in
+## ⚙️ Local Development Environment Setup
 
-* **CSRF Protection**: All client request forms are protected against Cross-Site Request Forgery.
-* **Input Validation**: Strict server-side verification for phone numbers, emails, and resume file types.
-* **SQL Injection Prevention**: Built using Object-Relational Mapping (ORM) to handle queries securely.
+Follow these steps to launch the ecosystem locally on your workstation.
+
+### 1. Initialize and Clone the Working Directory
+```bash
+git clone https://github.com
+cd DSD_Manpower
+```
+
+### 2. Set Up a Clean Virtual Workspace
+```powershell
+python -m venv venv
+.\venv\Scripts\activate
+```
+
+### 3. Install Required Library Components
+```powershell
+python -m pip install flask flask-sqlalchemy
+```
+
+### 4. Boot Up the Native Development Server
+```powershell
+python app.py
+```
+The site will instantly launch locally at **`http://127.0.0.1:5000`**.
+
+---
+
+## 🔒 Enterprise Security Protocols Built-in
+
+* **SQL Injection Mitigation**: Complete usage of Object-Relational Mapping (ORM) to treat inputs as parameters, neutralizing cross-site string injections.
+* **State Encryption**: Secure cookies managed via encrypted secret tokens prevent data exposure.
+* **Session Validation**: Enforces server-side authentication state validation on all admin and billing routes.
