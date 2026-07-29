@@ -1,66 +1,51 @@
 ﻿{% extends "base.html" %}
 {% block content %}
 <style>
-    .section-box { bg-color: white; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; margin-bottom: 40px; }
-    .section-title { font-size: 22px; font-weight: 800; color: #0f172a; margin-top: 0; margin-bottom: 20px; }
-    .delete-btn { color: #ef4444; text-decoration: none; font-weight: 700; padding: 5px 10px; border: 1px solid #fee2e2; background-color: #fef2f2; border-radius: 4px; font-size: 13px; transition: all 0.2s; }
-    .delete-btn:hover { background-color: #ef4444; color: white; border-color: #ef4444; }
-    .badge { background-color: #eff6ff; color: #1e40af; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 12px; }
-    .badge-green { background-color: #ecfdf5; color: #065f46; }
+    .section-box { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); border: 1px solid #e2e8f0; margin-bottom: 40px; }
+    .section-header-box { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .section-title { font-size: 22px; font-weight: 800; color: #0f172a; margin: 0; }
+    .action-link { background-color: #2563eb; color: white; padding: 8px 16px; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 13px; }
     .table-style { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
     .table-style th { background-color: #0f172a; color: white; padding: 14px; border: 1px solid #e2e8f0; }
     .table-style td { padding: 14px; border: 1px solid #e2e8f0; }
 </style>
-
 <div class="main-wrapper">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
         <h1 style="margin:0; font-weight:800; color:#0f172a;">🛡️ Operational Command Center</h1>
-        <a href="/admin-logout" style="color: #64748b; text-decoration: none; font-weight: bold;">Logout 🔒</a>
+        <div>
+            <a href="/admin-invoice" class="action-link" style="margin-right:10px; background-color:#10b981;">🧾 Invoice Engine</a>
+            <a href="/admin-logout" style="color: #64748b; text-decoration: none; font-weight: bold;">Logout 🔒</a>
+        </div>
     </div>
 
-    <!-- Section 1: Client Procurement Pipeline -->
+    <!-- Client Logs -->
     <div class="section-box">
         <div class="section-title">📋 Incoming Corporate Client Inquiries</div>
-        <table class="table-style">
-            <thead>
-                <tr><th>ID</th><th>Client Name</th><th>Email</th><th>Profile</th><th>Size</th><th>Actions</th></tr>
-            </thead>
+        <table class="table-style" style="margin-top:20px;">
+            <thead><tr><th>ID</th><th>Client Name</th><th>Email</th><th>Profile</th><th>Size</th></tr></thead>
             <tbody>
                 {% for lead in leads %}
-                <tr>
-                    <td>#{{ lead.id }}</td>
-                    <td><strong>{{ lead.client_name }}</strong></td>
-                    <td>{{ lead.email }}</td>
-                    <td><span class="badge">{{ lead.service_type }}</span></td>
-                    <td style="font-weight:700;">{{ lead.staff_count }} personnel</td>
-                    <td><a href="/admin-delete/{{ lead.id }}" class="delete-btn" onclick="return confirm('Resolve lead?');">Remove</a></td>
-                </tr>
-                {% else %}
-                <tr><td colspan="6" style="padding: 20px; text-align: center; color: #94a3b8;">No pending procurement client pipeline items.</td></tr>
+                <tr><td>#{{ lead.id }}</td><td><strong>{{ lead.client_name }}</strong></td><td>{{ lead.email }}</td><td>{{ lead.service_type }}</td><td>{{ lead.staff_count }}</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 
-    <!-- Section 2: Recruitment Pipeline -->
+    <!-- Shift Logs -->
     <div class="section-box">
-        <div class="section-title">👥 Active Employment Applicants</div>
-        <table class="table-style">
-            <thead>
-                <tr><th>ID</th><th>Applicant Name</th><th>Phone Number</th><th>Role Applied</th><th>Experience</th><th>Actions</th></tr>
-            </thead>
+        <div class="section-title">📡 Active Field Duty Attendance Tracking</div>
+        <table class="table-style" style="margin-top:20px;">
+            <thead><tr><th>Timestamp</th><th>Staff Guard Name</th><th>Punch Parameter</th><th>Deployment Target Location</th></tr></thead>
             <tbody>
-                {% for app in applicants %}
+                {% for log in attendance %}
                 <tr>
-                    <td>#{{ app.id }}</td>
-                    <td><strong>{{ app.applicant_name }}</strong></td>
-                    <td>{{ app.phone }}</td>
-                    <td><span class="badge badge-green">{{ app.role_applied }}</span></td>
-                    <td style="font-weight:700;">{{ app.experience }} Years</td>
-                    <td><a href="/admin-delete-applicant/{{ app.id }}" class="delete-btn" onclick="return confirm('Archive application?');">Archive</a></td>
+                    <td>{{ log.timestamp.strftime('%d-%m-%Y %H:%M') }}</td>
+                    <td><strong>{{ log.staff_name }}</strong></td>
+                    <td><span style="color: {% if log.action_type == 'Check-In' %}#10b981{% else %}#ef4444{% endif %}; font-weight:700;">{{ log.action_type }}</span></td>
+                    <td>{{ log.location_tag }}</td>
                 </tr>
                 {% else %}
-                <tr><td colspan="6" style="padding: 20px; text-align: center; color: #94a3b8;">No new employment candidates have applied yet.</td></tr>
+                <tr><td colspan="4" style="text-align:center; color:#94a3b8; padding:30px 0;">No active workforce logging received from mobile nodes yet.</td></tr>
                 {% endfor %}
             </tbody>
         </table>

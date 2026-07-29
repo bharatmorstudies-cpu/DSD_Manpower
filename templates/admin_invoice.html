@@ -1,0 +1,64 @@
+﻿{% extends "base.html" %}
+{% block content %}
+<style>
+    .invoice-layout { display: grid; grid-template-columns: 1fr 1.2fr; gap: 30px; margin: 40px auto; }
+    .panel-box { background: white; padding: 35px; border-radius: 12px; border: 1px solid #e2e8f0; height: fit-content; }
+    .form-control { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 20px; box-sizing: border-box; }
+    .bill-btn { background-color: #2563eb; color: white; width: 100%; padding: 14px; border: none; border-radius: 6px; font-weight: 700; font-size: 16px; cursor: pointer; }
+    .sheet-doc { background: white; padding: 50px; border-radius: 8px; border: 1px solid #cbd5e1; font-family: "Courier New", Courier, monospace; }
+</style>
+<div class="main-wrapper invoice-layout">
+    <div class="panel-box">
+        <h3 style="margin-top:0; font-weight:800;">Billing Engine</h3>
+        <form method="POST">
+            <label style="font-weight:600; font-size:14px; color:#475569;">Target Procurement Lead</label>
+            <select name="lead_id" class="form-control">
+                {% for lead in leads %}
+                    <option value="{{ lead.id }}">{{ lead.client_name }} ({{ lead.staff_count }} {{ lead.service_type }})</option>
+                {% endfor %}
+            </select>
+            <label style="font-weight:600; font-size:14px; color:#475569;">Deployment Cost Per Head (Daily)</label>
+            <input type="number" name="rate_per_head" class="form-control" placeholder="e.g. 1500" required>
+            
+            <label style="font-weight:600; font-size:14px; color:#475569;">Deployment Duration (Days)</label>
+            <input type="number" name="duration_days" class="form-control" min="1" value="1" required>
+            
+            <button type="submit" class="bill-btn">Generate Corporate Invoice</button>
+        </form>
+    </div>
+
+    <div>
+        {% if invoice %}
+        <div class="sheet-doc">
+            <div style="text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 20px; margin-bottom: 20px;">
+                <h2 style="margin:0; font-weight:800;">DSD & MATWAR SERVICES</h2>
+                <p style="margin:5px 0 0 0; font-size:13px; color:#64748b;">Premium Security Enforcement & Manpower Deployment</p>
+            </div>
+            <p><strong>INVOICE REFERENCE:</strong> {{ invoice.invoice_number }}</p>
+            <p><strong>DATE GENERATED:</strong> 30-07-2026</p>
+            <p><strong>CLIENT ENTITY:</strong> {{ invoice.client_name }}</p>
+            <hr style="border:1px dashed #cbd5e1; margin:20px 0;">
+            <table style="width:100%; text-align:left;">
+                <thead><tr><th>Description</th><th>Staff</th><th>Rate</th><th>Days</th><th style="text-align:right;">Subtotal</th></tr></thead>
+                <tbody>
+                    <tr>
+                        <td>{{ invoice.service_type }}</td>
+                        <td>{{ invoice.staff_count }}</td>
+                        <td>{{ invoice.rate }}</td>
+                        <td>{{ invoice.days }}</td>
+                        <td style="text-align:right;">{{ invoice.total }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div style="text-align:right; border-top: 2px solid #0f172a; margin-top:30px; padding-top:15px;">
+                <h4>TOTAL PAYABLE DUE: ₹/{{ invoice.total }}</h4>
+            </div>
+        </div>
+        {% else %}
+        <div class="panel-box" style="text-align:center; padding:60px 20px; color:#94a3b8; font-weight:500;">
+            Select parameters on the left pane to render corporate billing document outputs.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
