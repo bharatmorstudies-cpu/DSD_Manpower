@@ -5,98 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DSD & Matwar | Security & Premium Manpower Solutions</title>
     <style>
-        :root {
-            --primary: #0f172a; /* Midnight Navy */
-            --secondary: #1e3a8a; /* Deep Royal Blue */
-            --accent: #2563eb; /* Electric Blue */
-            --text-dark: #334155; /* Charcoal */
-            --bg-light: #f8fafc; /* Professional Off-White */
-            --white: #ffffff;
-        }
-
-        body { 
-            font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            background-color: var(--bg-light); 
-            margin: 0; 
-            padding: 0; 
-            color: var(--text-dark);
-            line-height: 1.6;
-        }
-
-        /* Modern Navigation */
-        .navbar { 
-            background-color: var(--primary); 
-            padding: 18px 0; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        .nav-container {
-            width: 85%;
-            max-width: 1200px;
-            margin: auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .navbar-brand { 
-            font-size: 22px; 
-            font-weight: 800; 
-            color: var(--white); 
-            text-decoration: none; 
-            letter-spacing: 0.5px;
-        }
-        .navbar-nav a { 
-            color: #94a3b8; 
-            text-decoration: none; 
-            margin-left: 24px; 
-            font-weight: 600; 
-            font-size: 15px;
-            transition: color 0.3s ease; 
-        }
-        .navbar-nav a:hover { 
-            color: var(--white); 
-        }
-        .admin-btn { 
-            background-color: #dc2626; 
-            color: var(--white) !important; 
-            padding: 6px 14px; 
-            border-radius: 6px; 
-        }
-        .admin-btn:hover { 
-            background-color: #b91c1c !important; 
-        }
-
-        /* Core Layout Content */
-        .main-wrapper {
-            width: 85%;
-            max-width: 1200px;
-            margin: 40px auto;
-        }
-
-        /* Professional Alert Messages */
-        .alert { 
-            background-color: #10b981; 
-            color: var(--white); 
-            padding: 16px; 
-            border-radius: 8px; 
-            text-align: center; 
-            margin-bottom: 30px; 
-            font-weight: 600;
-            box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);
-        }
-
-        /* Layout Footer */
-        footer {
-            background-color: var(--primary);
-            color: #64748b;
-            text-align: center;
-            padding: 25px 0;
-            margin-top: 80px;
-            font-size: 14px;
-            border-top: 3px solid var(--secondary);
-        }
+        :root { --primary: #0f172a; --secondary: #1e3a8a; --accent: #2563eb; --text-dark: #334155; --bg-light: #f8fafc; --white: #ffffff; }
+        body { font-family: "Segoe UI", Roboto, sans-serif; background-color: var(--bg-light); margin: 0; padding: 0; color: var(--text-dark); line-height: 1.6; }
+        .navbar { background-color: var(--primary); padding: 18px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
+        .nav-container { width: 85%; max-width: 1200px; margin: auto; display: flex; align-items: center; justify-content: space-between; }
+        .navbar-brand { font-size: 22px; font-weight: 800; color: var(--white); text-decoration: none; letter-spacing: 0.5px; }
+        .navbar-nav a { color: #94a3b8; text-decoration: none; margin-left: 24px; font-weight: 600; font-size: 15px; transition: color 0.3s; }
+        .navbar-nav a:hover { color: var(--white); }
+        .admin-btn { background-color: #dc2626; color: var(--white) !important; padding: 6px 14px; border-radius: 6px; }
+        .admin-btn:hover { background-color: #b91c1c !important; }
+        .main-wrapper { width: 85%; max-width: 1200px; margin: 40px auto; }
+        .alert { background-color: #10b981; color: var(--white); padding: 16px; border-radius: 8px; text-align: center; margin-bottom: 30px; font-weight: 600; }
+        footer { background-color: var(--primary); color: #64748b; text-align: center; padding: 25px 0; margin-top: 80px; font-size: 14px; border-top: 3px solid var(--secondary); }
     </style>
 </head>
 <body>
@@ -107,28 +27,18 @@
                 <a href="/">Home</a>
                 <a href="/services">Services</a>
                 <a href="/request-staff">Hire Personnel</a>
+                <a href="/careers">Join Our Team</a>
                 <a href="/payroll">Internal Payroll</a>
                 <a href="/admin-login" class="admin-btn">🔑 Admin Portal</a>
             </div>
         </div>
     </nav>
-    
     {% with messages = get_flashed_messages() %}
         {% if messages %}
-            <div class="main-wrapper" style="margin-bottom: 0;">
-                {% for message in messages %}
-                    <div class="alert">{{ message }}</div>
-                {% endfor %}
-            </div>
+            <div class="main-wrapper" style="margin-bottom: 0;"><div class="alert">{% for m in messages %}{{ m }}{% endfor %}</div></div>
         {% endif %}
     {% endwith %}
-
     {% block content %}{% endblock %}
-
-    <footer>
-        <div class="nav-container" style="justify-content: center;">
-            <p>&copy; 2026 DSD & Matwar Security & Manpower Supplies. ISO 9001:2015 Certified Agency.</p>
-        </div>
-    </footer>
+    <footer><p>&copy; 2026 DSD & Matwar Security & Manpower Supplies. ISO 9001:2015 Certified Agency.</p></footer>
 </body>
 </html>

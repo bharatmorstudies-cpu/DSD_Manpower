@@ -11,6 +11,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 
+# Existing Table: Client Procurement Enquiries
 class ManpowerRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     client_name = db.Column(db.String(100), nullable=False)
@@ -18,6 +19,15 @@ class ManpowerRequest(db.Model):
     service_type = db.Column(db.String(50), nullable=False)
     staff_count = db.Column(db.Integer, nullable=False)
     details = db.Column(db.Text, nullable=True)
+
+# NEW TABLE: Guard & Staff Recruitment Applications
+class JobApplication(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    applicant_name = db.Column(db.String(100), nullable=False)
+    phone = db.Column(db.String(20), nullable=False)
+    experience = db.Column(db.Integer, nullable=False)
+    role_applied = db.Column(db.String(50), nullable=False)
+    notes = db.Column(db.Text, nullable=True)
 
 with app.app_context():
     db.create_all()
@@ -45,6 +55,23 @@ def request_staff():
         flash("Your request has been saved permanently to our database!", "success")
         return redirect(url_for("request_staff"))
     return render_template("request_staff.html")
+
+# --- NEW CAREERS PORTAL ROUTE ---
+@app.route("/careers", methods=["GET", "POST"])
+def careers():
+    if request.method == "POST":
+        new_applicant = JobApplication(
+            applicant_name=request.form.get("applicant_name"),
+            phone=request.form.get("phone"),
+            experience=int(request.form.get("experience", 0)),
+            role_applied=request.form.get("role_applied"),
+            notes=request.form.get("notes")
+        )
+        db.session.add(new_applicant)
+        db.session.commit()
+        flash("Application submitted successfully! Our recruitment team will review your profile.", "success")
+        return redirect(url_for("careers"))
+    return render_template("careers.html")
 
 @app.route("/payroll", methods=["GET", "POST"])
 def payroll():
@@ -113,14 +140,15 @@ def admin_login():
             flash("Invalid administrator credentials.", "danger")
     return render_template("admin_login.html")
 
+# --- UPDATED ADMIN DASHBOARD: SHOWS INQUIRIES & APPLICATIONS ---
 @app.route("/admin-dashboard")
 def admin_dashboard():
     if not session.get("admin_logged_in"):
         return redirect(url_for("admin_login"))
     all_leads = ManpowerRequest.query.all()
-    return render_template("admin_dashboard.html", leads=all_leads)
+    all_applicants = JobApplication.query.all()
+    return render_template("admin_dashboard.html", leads=all_leads, applicants=all_applicants)
 
-# --- SECURE DELETION ROUTE ---
 @app.route("/admin-delete/<int:lead_id>")
 def admin_delete(lead_id):
     if not session.get("admin_logged_in"):
@@ -128,7 +156,18 @@ def admin_delete(lead_id):
     lead_to_delete = ManpowerRequest.query.get_or_404(lead_id)
     db.session.delete(lead_to_delete)
     db.session.commit()
-    flash("Inquiry record successfully archived and removed from database.", "success")
+    flash("Inquiry record successfully removed.", "success")
+    return redirect(url_for("admin_dashboard"))
+
+# --- NEW: DELETE RECRUITMENT APPLICANT ---
+@app.route("/admin-delete-applicant/<int:app_id>")
+def admin_delete_applicant(app_id):
+    if not session.get("admin_logged_in"):
+        return redirect(url_for("admin_login"))
+    app_to_delete = JobApplication.query.get_or_404(app_id)
+    db.session.delete(app_to_delete)
+    db.session.commit()
+    flash("Application record successfully removed.", "success")
     return redirect(url_for("admin_dashboard"))
 
 @app.route("/admin-logout")

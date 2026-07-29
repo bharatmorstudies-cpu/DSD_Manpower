@@ -1,0 +1,45 @@
+﻿{% extends "base.html" %}
+{% block content %}
+<style>
+    .form-card { max-width: 600px; margin: 40px auto; background: white; padding: 45px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; }
+    .form-card h3 { font-size: 26px; font-weight: 800; color: #0f172a; margin-top: 0; margin-bottom: 10px; text-align: center; }
+    .form-card p { text-align: center; color: #64748b; margin-bottom: 30px; font-size: 15px; }
+    .input-group { margin-bottom: 20px; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: #475569; }
+    .form-control { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 15px; color: #0f172a; box-sizing: border-box; }
+    .form-control:focus { outline: none; border-color: #2563eb; }
+    .submit-btn { background-color: #2563eb; color: white; width: 100%; padding: 14px; border: none; border-radius: 6px; font-weight: 700; font-size: 16px; cursor: pointer; transition: background-color 0.2s; margin-top: 10px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+    .submit-btn:hover { background-color: #1d4ed8; }
+</style>
+<div class="form-card">
+    <h3>Employment Application</h3>
+    <p>Apply for premium verified operational assignments with DSD & Matwar.</p>
+    <form method="POST">
+        <div class="input-group">
+            <label>Full Legal Name</label>
+            <input type="text" name="applicant_name" class="form-control" placeholder="e.g. Vikram Singh" required>
+        </div>
+        <div class="input-group">
+            <label>Active Contact Phone Number</label>
+            <input type="text" name="phone" class="form-control" placeholder="e.g. +91 98765 43210" required>
+        </div>
+        <div class="input-group">
+            <label>Target Operational Role Profile</label>
+            <select name="role_applied" class="form-control">
+                <option value="Elite Bouncer Guard">Elite Bouncer / VIP Protection</option>
+                <option value="Housekeeping Operative">Housekeeping Asset Force</option>
+                <option value="Field Security Supervisor">Field Security Supervisor</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Total Field Experience (Years)</label>
+            <input type="number" name="experience" class="form-control" min="0" value="0" required>
+        </div>
+        <div class="input-group">
+            <label>Background Overview / Physical Attributes / Qualifications</label>
+            <textarea name="notes" class="form-control" rows="4" placeholder="Detail any training history, height metrics, or background certifications..."></textarea>
+        </div>
+        <button type="submit" class="submit-btn">Submit Official Job Application</button>
+    </form>
+</div>
+{% endblock %}
