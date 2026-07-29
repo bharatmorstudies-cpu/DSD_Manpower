@@ -28,32 +28,30 @@ class JobApplication(db.Model):
     role_applied = db.Column(db.String(50), nullable=False)
     notes = db.Column(db.Text, nullable=True)
 
+# RESTRUCTURED MODEL: Tracks shifts on a single line with duration parameters
 class AttendanceLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     staff_name = db.Column(db.String(100), nullable=False)
-    action_type = db.Column(db.String(20), nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.now)
     location_tag = db.Column(db.String(100), nullable=False)
+    check_in_time = db.Column(db.DateTime, nullable=True)
+    check_out_time = db.Column(db.DateTime, nullable=True)
+    hours_worked = db.Column(db.Float, default=0.0)
 
 with app.app_context():
     db.create_all()
 
 @app.route("/")
-def home():
-    return render_template("home.html")
+def home(): return render_template("home.html")
 
 @app.route("/services")
-def services():
-    return render_template("services.html")
+def services(): return render_template("services.html")
 
 @app.route("/request-staff", methods=["GET", "POST"])
 def request_staff():
     if request.method == "POST":
         new_request = ManpowerRequest(
-            client_name=request.form.get("name"),
-            email=request.form.get("email"),
-            service_type=request.form.get("service_type"),
-            staff_count=int(request.form.get("staff_count", 1)),
+            client_name=request.form.get("name"), email=request.form.get("email"),
+            service_type=request.form.get("service_type"), staff_count=int(request.form.get("staff_count", 1)),
             details=request.form.get("details")
         )
         db.session.add(new_request)
@@ -66,10 +64,8 @@ def request_staff():
 def careers():
     if request.method == "POST":
         new_applicant = JobApplication(
-            applicant_name=request.form.get("applicant_name"),
-            phone=request.form.get("phone"),
-            experience=int(request.form.get("experience", 0)),
-            role_applied=request.form.get("role_applied"),
+            applicant_name=request.form.get("applicant_name"), phone=request.form.get("phone"),
+            experience=int(request.form.get("experience", 0)), role_applied=request.form.get("role_applied"),
             notes=request.form.get("notes")
         )
         db.session.add(new_applicant)
@@ -78,24 +74,52 @@ def careers():
         return redirect(url_for("careers"))
     return render_template("careers.html")
 
+# --- RESTRUCTURED: MATCH PUNCH TIMES AND AUTOMATICALLY CALCULATE HOURS ---
 @app.route("/attendance", methods=["GET", "POST"])
 def attendance():
     if request.method == "POST":
-        log_entry = AttendanceLog(
-            staff_name=request.form.get("staff_name"),
-            action_type=request.form.get("action_type"),
-            location_tag=request.form.get("location_tag", "Main Site")
-        )
-        db.session.add(log_entry)
-        db.session.commit()
-        flash(f"Status logged: {log_entry.action_type} recorded successfully!", "success")
+        name = request.form.get("staff_name").strip()
+        location = request.form.get("location_tag").strip()
+        action = request.form.get("action_type")
+        current_time = datetime.now()
+
+        if action == "Check-In":
+            # Start a brand new shift record for this staff member
+            log_entry = AttendanceLog(
+                staff_name=name, location_tag=location, check_in_time=current_time
+            )
+            db.session.add(log_entry)
+            db.session.commit()
+            flash(f"{name} checked in successfully at {current_time.strftime('%H:%M')}", "success")
+        
+        elif action == "Check-Out":
+            # Search for an active shift (where they checked in but haven't checked out yet)
+            active_shift = AttendanceLog.query.filter_by(
+                staff_name=name, check_out_time=None
+            ).order_by(AttendanceLog.check_in_time.desc()).first()
+
+            if active_shift:
+                active_shift.check_out_time = current_time
+                # Subtract times to find total elapsed time duration
+                time_delta = current_time - active_shift.check_in_time
+                active_shift.hours_worked = round(time_delta.total_seconds() / 3600.0, 2)
+                db.session.commit()
+                flash(f"{name} checked out. Shift Duration: {active_shift.hours_worked} hours.", "success")
+            else:
+                # If no check-in is logged, create a standalone checkout block
+                log_entry = AttendanceLog(
+                    staff_name=name, location_tag=location, check_out_time=current_time
+                )
+                db.session.add(log_entry)
+                db.session.commit()
+                flash(f"Check-Out recorded directly for {name} (Missing corresponding Check-In history).", "warning")
+                
         return redirect(url_for("attendance"))
     return render_template("attendance.html")
 
 @app.route("/admin-invoice", methods=["GET", "POST"])
 def admin_invoice():
-    if not session.get("admin_logged_in"):
-        return redirect(url_for("admin_login"))
+    if not session.get("admin_logged_in"): return redirect(url_for("admin_login"))
     all_leads = ManpowerRequest.query.all()
     selected_invoice = None
     if request.method == "POST":
@@ -106,13 +130,9 @@ def admin_invoice():
         if target_lead:
             total_cost = target_lead.staff_count * rate_per_head * duration_days
             selected_invoice = {
-                "client_name": target_lead.client_name,
-                "service_type": target_lead.service_type,
-                "staff_count": target_lead.staff_count,
-                "rate": rate_per_head,
-                "days": duration_days,
-                "total": round(total_cost, 2),
-                "invoice_number": f"DSDM-{1000 + target_lead.id}"
+                "client_name": target_lead.client_name, "service_type": target_lead.service_type,
+                "staff_count": target_lead.staff_count, "rate": rate_per_head, "days": duration_days,
+                "total": round(total_cost, 2), "invoice_number": f"DSDM-{1000 + target_lead.id}"
             }
     return render_template("admin_invoice.html", leads=all_leads, invoice=selected_invoice)
 
@@ -133,28 +153,6 @@ def payroll():
         except ValueError: flash("Enter valid numbers.", "danger")
     return render_template("payroll.html", result=payroll_result, session_ledger=session["ledger"])
 
-@app.route("/export-payroll")
-def export_payroll():
-    ledger = session.get("ledger", [])
-    if not ledger: return redirect(url_for("payroll"))
-    output = io.StringIO()
-    writer = csv.writer(output)
-    writer.writerow(["Staff Name", "Total Hours Logged", "Gross Payout"])
-    for row in ledger: writer.writerow([row["name"], row["hours"], row["pay"]])
-    output.seek(0)
-    return Response(output.getvalue(), mimetype="text/csv", headers={"Content-disposition": "attachment; filename=DSD_Matwar_Payroll_Export.csv"})
-
-@app.route("/export-applicants")
-def export_applicants():
-    if not session.get("admin_logged_in"): return redirect(url_for("admin_login"))
-    applicants = JobApplication.query.all()
-    output = io.StringIO()
-    writer = csv.writer(output)
-    writer.writerow(["ID", "Applicant Name", "Phone", "Role", "Experience"])
-    for app_item in applicants: writer.writerow([app_item.id, app_item.applicant_name, app_item.phone, app_item.role_applied, app_item.experience])
-    output.seek(0)
-    return Response(output.getvalue(), mimetype="text/csv", headers={"Content-disposition": "attachment; filename=DSD_Matwar_Applicants_Export.csv"})
-
 @app.route("/admin-login", methods=["GET", "POST"])
 def admin_login():
     if request.method == "POST":
@@ -169,29 +167,8 @@ def admin_dashboard():
     if not session.get("admin_logged_in"): return redirect(url_for("admin_login"))
     all_leads = ManpowerRequest.query.all()
     all_applicants = JobApplication.query.all()
-    all_attendance = AttendanceLog.query.order_by(AttendanceLog.timestamp.desc()).all()
+    all_attendance = AttendanceLog.query.order_by(AttendanceLog.id.desc()).all()
     return render_template("admin_dashboard.html", leads=all_leads, applicants=all_applicants, attendance=all_attendance)
-
-@app.route("/admin-delete/<int:lead_id>")
-def admin_delete(lead_id):
-    if not session.get("admin_logged_in"): return redirect(url_for("admin_login"))
-    lead_to_delete = ManpowerRequest.query.get_or_404(lead_id)
-    db.session.delete(lead_to_delete)
-    db.session.commit()
-    return redirect(url_for("admin_dashboard"))
-
-@app.route("/admin-delete-applicant/<int:app_id>")
-def admin_delete_applicant(app_id):
-    if not session.get("admin_logged_in"): return redirect(url_for("admin_login"))
-    app_to_delete = JobApplication.query.get_or_404(app_id)
-    db.session.delete(app_to_delete)
-    db.session.commit()
-    return redirect(url_for("admin_dashboard"))
-
-@app.route("/admin-logout")
-def admin_logout():
-    session.pop("admin_logged_in", None)
-    return redirect(url_for("home"))
 
 if __name__ == "__main__":
     app.run(debug=True)

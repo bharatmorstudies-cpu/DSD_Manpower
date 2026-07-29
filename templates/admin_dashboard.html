@@ -8,6 +8,7 @@
     .table-style { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
     .table-style th { background-color: #0f172a; color: white; padding: 14px; border: 1px solid #e2e8f0; }
     .table-style td { padding: 14px; border: 1px solid #e2e8f0; }
+    .badge-time { font-family: "Courier New", monospace; background-color: #f1f5f9; padding: 3px 6px; border-radius: 4px; font-weight: bold; }
 </style>
 <div class="main-wrapper">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
@@ -18,7 +19,7 @@
         </div>
     </div>
 
-    <!-- Client Logs -->
+    <!-- Client Log Panel -->
     <div class="section-box">
         <div class="section-title">📋 Incoming Corporate Client Inquiries</div>
         <table class="table-style" style="margin-top:20px;">
@@ -31,21 +32,36 @@
         </table>
     </div>
 
-    <!-- Shift Logs -->
+    <!-- Restructured Shift Duration Logger Panel -->
     <div class="section-box">
         <div class="section-title">📡 Active Field Duty Attendance Tracking</div>
         <table class="table-style" style="margin-top:20px;">
-            <thead><tr><th>Timestamp</th><th>Staff Guard Name</th><th>Punch Parameter</th><th>Deployment Target Location</th></tr></thead>
+            <thead>
+                <tr>
+                    <th>Staff Guard Name</th>
+                    <th>Deployment Target Location</th>
+                    <th>Check-In Time</th>
+                    <th>Check-Out Time</th>
+                    <th style="text-align: right;">Total Shift Duration</th>
+                </tr>
+            </thead>
             <tbody>
                 {% for log in attendance %}
                 <tr>
-                    <td>{{ log.timestamp.strftime('%d-%m-%Y %H:%M') }}</td>
                     <td><strong>{{ log.staff_name }}</strong></td>
-                    <td><span style="color: {% if log.action_type == 'Check-In' %}#10b981{% else %}#ef4444{% endif %}; font-weight:700;">{{ log.action_type }}</span></td>
                     <td>{{ log.location_tag }}</td>
+                    <td><span class="badge-time" style="color:#10b981;">{{ log.check_in_time.strftime('%d-%m-%Y %H:%M') if log.check_in_time else 'Missing' }}</span></td>
+                    <td><span class="badge-time" style="color:#ef4444;">{{ log.check_out_time.strftime('%d-%m-%Y %H:%M') if log.check_out_time else 'Active Duty' }}</span></td>
+                    <td style="text-align: right; font-weight:800; color: #1e3a8a;">
+                        {% if log.check_out_time %}
+                            {{ log.hours_worked }} hrs
+                        {% else %}
+                            <span style="color:#eab308; font-weight:bold;">On Shift ⏳</span>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% else %}
-                <tr><td colspan="4" style="text-align:center; color:#94a3b8; padding:30px 0;">No active workforce logging received from mobile nodes yet.</td></tr>
+                <tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:30px 0;">No active shift parameters received from field nodes yet.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
