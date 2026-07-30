@@ -28,7 +28,6 @@ class JobApplication(db.Model):
     role_applied = db.Column(db.String(50), nullable=False)
     notes = db.Column(db.Text, nullable=True)
 
-# RESTRUCTURED MODEL: Tracks shifts on a single line with duration parameters
 class AttendanceLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     staff_name = db.Column(db.String(100), nullable=False)
@@ -37,8 +36,19 @@ class AttendanceLog(db.Model):
     check_out_time = db.Column(db.DateTime, nullable=True)
     hours_worked = db.Column(db.Float, default=0.0)
 
+# NEW TABLE: Tracks dynamically updated administrator credentials
+class AdminConfig(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), nullable=False, default="admin")
+    password = db.Column(db.String(100), nullable=False, default="dsdmatwar123")
+
 with app.app_context():
     db.create_all()
+    # Seed default credentials if database table is brand new
+    if not AdminConfig.query.first():
+        default_admin = AdminConfig()
+        db.session.add(default_admin)
+        db.session.commit()
 
 @app.route("/")
 def home(): return render_template("home.html")
@@ -74,7 +84,6 @@ def careers():
         return redirect(url_for("careers"))
     return render_template("careers.html")
 
-# --- RESTRUCTURED: MATCH PUNCH TIMES AND AUTOMATICALLY CALCULATE HOURS ---
 @app.route("/attendance", methods=["GET", "POST"])
 def attendance():
     if request.method == "POST":
@@ -84,38 +93,40 @@ def attendance():
         current_time = datetime.now()
 
         if action == "Check-In":
-            # Start a brand new shift record for this staff member
-            log_entry = AttendanceLog(
-                staff_name=name, location_tag=location, check_in_time=current_time
-            )
+            log_entry = AttendanceLog(staff_name=name, location_tag=location, check_in_time=current_time)
             db.session.add(log_entry)
             db.session.commit()
             flash(f"{name} checked in successfully at {current_time.strftime('%H:%M')}", "success")
-        
         elif action == "Check-Out":
-            # Search for an active shift (where they checked in but haven't checked out yet)
-            active_shift = AttendanceLog.query.filter_by(
-                staff_name=name, check_out_time=None
-            ).order_by(AttendanceLog.check_in_time.desc()).first()
-
+            active_shift = AttendanceLog.query.filter_by(staff_name=name, check_out_time=None).order_by(AttendanceLog.check_in_time.desc()).first()
             if active_shift:
                 active_shift.check_out_time = current_time
-                # Subtract times to find total elapsed time duration
                 time_delta = current_time - active_shift.check_in_time
                 active_shift.hours_worked = round(time_delta.total_seconds() / 3600.0, 2)
                 db.session.commit()
                 flash(f"{name} checked out. Shift Duration: {active_shift.hours_worked} hours.", "success")
             else:
-                # If no check-in is logged, create a standalone checkout block
-                log_entry = AttendanceLog(
-                    staff_name=name, location_tag=location, check_out_time=current_time
-                )
+                log_entry = AttendanceLog(staff_name=name, location_tag=location, check_out_time=current_time)
                 db.session.add(log_entry)
                 db.session.commit()
-                flash(f"Check-Out recorded directly for {name} (Missing corresponding Check-In history).", "warning")
-                
+                flash(f"Check-Out recorded directly for {name} (Missing Check-In).", "warning")
         return redirect(url_for("attendance"))
     return render_template("attendance.html")
+
+# --- MASTER ATTENDANCE REPORT DOWNLOAD UTILITY ---
+@app.route("/export-master-attendance")
+def export_master_attendance():
+    if not session.get("admin_logged_in"): return redirect(url_for("admin_login"))
+    logs = AttendanceLog.query.order_by(AttendanceLog.id.desc()).all()
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Staff Name", "Location", "Check-In Time", "Check-Out Time", "Hours Worked"])
+    for log in logs:
+        in_str = log.check_in_time.strftime('%Y-%m-%d %H:%M') if log.check_in_time else "Missing"
+        out_str = log.check_out_time.strftime('%Y-%m-%d %H:%M') if log.check_out_time else "On Shift"
+        writer.writerow([log.staff_name, log.location_tag, in_str, out_str, f"{log.hours_worked} hrs"])
+    output.seek(0)
+    return Response(output.getvalue(), mimetype="text/csv", headers={"Content-disposition": "attachment; filename=Master_Attendance_Report.csv"})
 
 @app.route("/admin-invoice", methods=["GET", "POST"])
 def admin_invoice():
@@ -153,10 +164,12 @@ def payroll():
         except ValueError: flash("Enter valid numbers.", "danger")
     return render_template("payroll.html", result=payroll_result, session_ledger=session["ledger"])
 
+# --- MODIFIED: LOGIN CHECKS AGAINST CONFIG MODEL ---
 @app.route("/admin-login", methods=["GET", "POST"])
 def admin_login():
     if request.method == "POST":
-        if request.form.get("username") == "admin" and request.form.get("password") == "dsdmatwar123":
+        config = AdminConfig.query.first()
+        if request.form.get("username") == config.username and request.form.get("password") == config.password:
             session["admin_logged_in"] = True
             return redirect(url_for("admin_dashboard"))
         else: flash("Invalid credentials.", "danger")
@@ -169,6 +182,27 @@ def admin_dashboard():
     all_applicants = JobApplication.query.all()
     all_attendance = AttendanceLog.query.order_by(AttendanceLog.id.desc()).all()
     return render_template("admin_dashboard.html", leads=all_leads, applicants=all_applicants, attendance=all_attendance)
+
+# --- NEW: SYSTEM SETTINGS VIA ADMIN WORKSPACE ---
+@app.route("/admin-settings", methods=["GET", "POST"])
+def admin_settings():
+    if not session.get("admin_logged_in"): return redirect(url_for("admin_login"))
+    config = AdminConfig.query.first()
+    if request.method == "POST":
+        new_user = request.form.get("username").strip()
+        new_pass = request.form.get("password").strip()
+        if new_user and new_pass:
+            config.username = new_user
+            config.password = new_pass
+            db.session.commit()
+            flash("Administrator credentials updated successfully!", "success")
+            return redirect(url_for("admin_dashboard"))
+    return render_template("admin_settings.html", config=config)
+
+@app.route("/admin-logout")
+def admin_logout():
+    session.pop("admin_logged_in", None)
+    return redirect(url_for("home"))
 
 if __name__ == "__main__":
     app.run(debug=True)

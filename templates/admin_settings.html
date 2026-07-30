@@ -1,0 +1,26 @@
+﻿{% extends "base.html" %}
+{% block content %}
+<style>
+    .settings-card { max-width: 500px; margin: 40px auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; }
+    .settings-card h3 { font-size: 24px; font-weight: 800; color: #0f172a; margin-top: 0; margin-bottom: 20px; text-align: center; }
+    .input-group { margin-bottom: 20px; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: #475569; }
+    .form-control { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 15px; box-sizing: border-box; }
+    .save-btn { background-color: #0f172a; color: white; width: 100%; padding: 14px; border: none; border-radius: 6px; font-weight: 700; font-size: 16px; cursor: pointer; transition: background 0.2s; }
+    .save-btn:hover { background-color: #1e293b; }
+</style>
+<div class="settings-card">
+    <h3>⚙️ Portal Security Access Settings</h3>
+    <form method="POST">
+        <div class="input-group">
+            <label>Master Administrative Username</label>
+            <input type="text" name="username" class="form-control" value="{{ config.username }}" required>
+        </div>
+        <div class="input-group">
+            <label>New Secret Security Password</label>
+            <input type="password" name="password" class="form-control" placeholder="Enter private password profile string" required>
+        </div>
+        <button type="submit" class="save-btn">Update Portal Credentials</button>
+    </form>
+</div>
+{% endblock %}

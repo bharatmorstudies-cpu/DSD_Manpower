@@ -5,6 +5,8 @@
     .section-header-box { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     .section-title { font-size: 22px; font-weight: 800; color: #0f172a; margin: 0; }
     .action-link { background-color: #2563eb; color: white; padding: 8px 16px; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 13px; }
+    .export-btn { background-color: #10b981; color: white; padding: 6px 14px; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 13px; transition: background 0.2s; }
+    .export-btn:hover { background-color: #059669; }
     .table-style { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
     .table-style th { background-color: #0f172a; color: white; padding: 14px; border: 1px solid #e2e8f0; }
     .table-style td { padding: 14px; border: 1px solid #e2e8f0; }
@@ -15,11 +17,12 @@
         <h1 style="margin:0; font-weight:800; color:#0f172a;">🛡️ Operational Command Center</h1>
         <div>
             <a href="/admin-invoice" class="action-link" style="margin-right:10px; background-color:#10b981;">🧾 Invoice Engine</a>
+            <a href="/admin-settings" class="action-link" style="margin-right:10px; background-color:#64748b;">⚙️ Security Settings</a>
             <a href="/admin-logout" style="color: #64748b; text-decoration: none; font-weight: bold;">Logout 🔒</a>
         </div>
     </div>
 
-    <!-- Client Log Panel -->
+    <!-- Client Logs -->
     <div class="section-box">
         <div class="section-title">📋 Incoming Corporate Client Inquiries</div>
         <table class="table-style" style="margin-top:20px;">
@@ -32,14 +35,19 @@
         </table>
     </div>
 
-    <!-- Restructured Shift Duration Logger Panel -->
+    <!-- Attendance Grid with Master Excel Export Button -->
     <div class="section-box">
-        <div class="section-title">📡 Active Field Duty Attendance Tracking</div>
-        <table class="table-style" style="margin-top:20px;">
+        <div class="section-header-box">
+            <div class="section-title">📡 Active Field Duty Attendance Tracking</div>
+            {% if attendance %}
+                <a href="/export-master-attendance" class="export-btn">📥 Download Master Attendance Log</a>
+            {% endif %}
+        </div>
+        <table class="table-style">
             <thead>
                 <tr>
-                    <th>Staff Guard Name</th>
-                    <th>Deployment Target Location</th>
+                    <th>Staff Name</th>
+                    <th>Deployment Location</th>
                     <th>Check-In Time</th>
                     <th>Check-Out Time</th>
                     <th style="text-align: right;">Total Shift Duration</th>
