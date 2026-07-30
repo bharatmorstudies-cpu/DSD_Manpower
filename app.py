@@ -36,23 +36,18 @@ class AttendanceLog(db.Model):
     check_out_time = db.Column(db.DateTime, nullable=True)
     hours_worked = db.Column(db.Float, default=0.0)
 
+# NEW TABLE: Tracks dynamically updated administrator credentials
 class AdminConfig(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), nullable=False, default="admin")
     password = db.Column(db.String(100), nullable=False, default="dsdmatwar123")
 
-class GuardProfile(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    guard_name = db.Column(db.String(100), nullable=False)
-    phone = db.Column(db.String(20), nullable=False)
-    uniform_size = db.Column(db.String(10), nullable=False)
-    verification_status = db.Column(db.String(20), default="Pending")
-    assigned_location = db.Column(db.String(100), default="Unassigned")
-
 with app.app_context():
     db.create_all()
+    # Seed default credentials if database table is brand new
     if not AdminConfig.query.first():
-        db.session.add(AdminConfig())
+        default_admin = AdminConfig()
+        db.session.add(default_admin)
         db.session.commit()
 
 @app.route("/")
@@ -96,11 +91,12 @@ def attendance():
         location = request.form.get("location_tag").strip()
         action = request.form.get("action_type")
         current_time = datetime.now()
+
         if action == "Check-In":
             log_entry = AttendanceLog(staff_name=name, location_tag=location, check_in_time=current_time)
             db.session.add(log_entry)
             db.session.commit()
-            flash(f"{name} checked in successfully!", "success")
+            flash(f"{name} checked in successfully at {current_time.strftime('%H:%M')}", "success")
         elif action == "Check-Out":
             active_shift = AttendanceLog.query.filter_by(staff_name=name, check_out_time=None).order_by(AttendanceLog.check_in_time.desc()).first()
             if active_shift:
@@ -108,15 +104,16 @@ def attendance():
                 time_delta = current_time - active_shift.check_in_time
                 active_shift.hours_worked = round(time_delta.total_seconds() / 3600.0, 2)
                 db.session.commit()
-                flash(f"{name} checked out successfully!", "success")
+                flash(f"{name} checked out. Shift Duration: {active_shift.hours_worked} hours.", "success")
             else:
                 log_entry = AttendanceLog(staff_name=name, location_tag=location, check_out_time=current_time)
                 db.session.add(log_entry)
                 db.session.commit()
-                flash(f"Check-Out recorded for {name} (Missing Check-In).", "warning")
+                flash(f"Check-Out recorded directly for {name} (Missing Check-In).", "warning")
         return redirect(url_for("attendance"))
     return render_template("attendance.html")
 
+# --- MASTER ATTENDANCE REPORT DOWNLOAD UTILITY ---
 @app.route("/export-master-attendance")
 def export_master_attendance():
     if not session.get("admin_logged_in"): return redirect(url_for("admin_login"))
@@ -167,6 +164,7 @@ def payroll():
         except ValueError: flash("Enter valid numbers.", "danger")
     return render_template("payroll.html", result=payroll_result, session_ledger=session["ledger"])
 
+# --- MODIFIED: LOGIN CHECKS AGAINST CONFIG MODEL ---
 @app.route("/admin-login", methods=["GET", "POST"])
 def admin_login():
     if request.method == "POST":
@@ -183,25 +181,28 @@ def admin_dashboard():
     all_leads = ManpowerRequest.query.all()
     all_applicants = JobApplication.query.all()
     all_attendance = AttendanceLog.query.order_by(AttendanceLog.id.desc()).all()
-    all_guards = GuardProfile.query.all()
-    return render_template("admin_dashboard.html", leads=all_leads, applicants=all_applicants, attendance=all_attendance, guards=all_guards)
+    return render_template("admin_dashboard.html", leads=all_leads, applicants=all_applicants, attendance=all_attendance)
 
-@app.route("/admin-guards", methods=["GET", "POST"])
-def admin_guards():
-    if not session.get("admin_logged_in"): return redirect(url_for("admin_login"))
-    if request.method == "POST":
-        new_guard = GuardProfile(
-            guard_name=request.form.get("guard_name"),
-            phone=request.form.get("phone"),
-            uniform_size=request.form.get("uniform_size"),
-            verification_status=request.form.get("verification_status"),
-            assigned_location=request.form.get("assigned_location", "Unassigned")
-        )
-        db.session.add(new_guard)
-        db.session.commit()
-        flash("Personnel record successfully created in corporate directory!", "success")
-        return redirect(url_for("admin_dashboard"))
-    return render_template("admin_guards.html")
-
+# --- NEW: SYSTEM SETTINGS VIA ADMIN WORKSPACE ---
 @app.route("/admin-settings", methods=["GET", "POST"])
 def admin_settings():
+    if not session.get("admin_logged_in"): return redirect(url_for("admin_login"))
+    config = AdminConfig.query.first()
+    if request.method == "POST":
+        new_user = request.form.get("username").strip()
+        new_pass = request.form.get("password").strip()
+        if new_user and new_pass:
+            config.username = new_user
+            config.password = new_pass
+            db.session.commit()
+            flash("Administrator credentials updated successfully!", "success")
+            return redirect(url_for("admin_dashboard"))
+    return render_template("admin_settings.html", config=config)
+
+@app.route("/admin-logout")
+def admin_logout():
+    session.pop("admin_logged_in", None)
+    return redirect(url_for("home"))
+
+if __name__ == "__main__":
+    app.run(debug=True)
